@@ -11,4 +11,11 @@ venv/
 *.tar.gz
 
 # kAFL local install dir at repo root
-/kafl/
+# edit by verf1sh: track fuzzer source, ignore build artifacts
+/kafl/.venv/
+/kafl/qemu/
+/kafl/libxdc/
+/kafl/capstone/
+/kafl/radamsa/
+/kafl/ghidra_10.1.3_PUBLIC/
+/kafl/**/__pycache__/
