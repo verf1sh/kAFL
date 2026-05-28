@@ -113,16 +113,17 @@ fi
 CONFIG_DIR="$SCRIPT_DIR/config"
 mkdir -p "$CONFIG_DIR"
 
-# kafl.yaml
-if [ ! -f "$CONFIG_DIR/kafl.yaml" ]; then
-    info "生成 kafl.yaml 配置模板 ..."
-    cp "$SCRIPT_DIR/templates/kafl.yaml.example" "$CONFIG_DIR/kafl.yaml"
-    # 自动替换路径
-    sed -i "s|{{KROOT}}|$SCRIPT_DIR|g" "$CONFIG_DIR/kafl.yaml"
-    sed -i "s|{{SEED_DIR}}|$SCRIPT_DIR/seeds|g" "$CONFIG_DIR/kafl.yaml"
-    sed -i "s|{{STRATEGY_PATH}}|$CONFIG_DIR/strategy.yaml|g" "$CONFIG_DIR/kafl.yaml"
+# kafl.yaml — 从 example 目录复制并替换路径
+IVANTI_KAFL="$SCRIPT_DIR/kafl/examples/firmware/ivanti/kafl.yaml"
+if [ ! -f "$CONFIG_DIR/kafl.yaml" ] && [ -f "$IVANTI_KAFL" ]; then
+    info "生成 kafl.yaml 配置 ..."
+    cp "$IVANTI_KAFL" "$CONFIG_DIR/kafl.yaml"
+    # 自动替换示例路径为实际路径
+    sed -i "s|/path/to/Ivanti.qcow2|$SCRIPT_DIR/Ivanti.qcow2|g" "$CONFIG_DIR/kafl.yaml"
+    sed -i "s|#strategy_config: ./strategy.yaml|strategy_config: $CONFIG_DIR/strategy.yaml|g" "$CONFIG_DIR/kafl.yaml"
+    sed -i "s|#seed_dir: ./seeds|seed_dir: $SEED_DST|g" "$CONFIG_DIR/kafl.yaml"
 else
-    warn "$CONFIG_DIR/kafl.yaml 已存在，跳过"
+    warn "$CONFIG_DIR/kafl.yaml 已存在或 example 配置不存在，跳过"
 fi
 
 # strategy.yaml
