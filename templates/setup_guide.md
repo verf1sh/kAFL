@@ -18,7 +18,7 @@ cd kAFL
 - 编译 agent + hook
 - 打 QEMU 补丁 (nyx_warn → nyx_debug)
 - 生成 `config/kafl.yaml` 和 `config/strategy.yaml`
-- 复制种子到 `config/seeds/`
+- 种子在 `kafl/examples/firmware/ivanti/seeds/` (随 example 一起拉取)
 
 ---
 
@@ -64,7 +64,7 @@ config/strategy.yaml  # (可选) agent 通过 strategy.txt 读取
 python3 kafl/fuzzer/scripts/generate_agent_config.py \
     --strategy config/strategy.yaml \
     --output config/strategy.txt \
-    --seed-dir config/seeds
+    --seed-dir kafl/examples/firmware/ivanti/seeds
 ```
 
 ### 3.2 启动 agent (VM 内)
@@ -103,7 +103,7 @@ kafl fuzz --config config/kafl.yaml -w /tmp/ivanti_fuzz
 | agent 已编译 | `file kafl/examples/firmware/ivanti/agent` |
 | hook 已编译 | `file kafl/examples/firmware/ivanti/hook_SSL_read.so` |
 | QEMU 补丁已打 | `grep nyx_debug kafl/qemu/nyx/synchronization.c` |
-| 种子存在 | `ls config/seeds/` |
+| 种子存在 | `ls kafl/examples/firmware/ivanti/seeds/` |
 | VM 内 agent 可运行 | `ssh vm ./agent --help` |
 
 ---
