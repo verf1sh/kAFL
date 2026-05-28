@@ -1,0 +1,18 @@
+From: verf1sh
+Subject: [PATCH] Replace nyx_warn with nyx_debug for root snapshot message
+
+The "Root snapshot is not available yet" message fires on every VM boot
+during normal operation. Using nyx_warn floods the console with
+unnecessary warnings. Downgrade to nyx_debug to reduce noise.
+
+---
+ qemu/nyx/synchronization.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qemu/nyx/synchronization.c b/qemu/nyx/synchronization.c
+index 0000000..0000000 100644
+--- a/qemu/nyx/synchronization.c
++++ b/qemu/nyx/synchronization.c
+@@ -285,7 +285,7 @@
+-        nyx_warn("Root snapshot is not available yet!\n");
++        nyx_debug("Root snapshot is not available yet!\n");
