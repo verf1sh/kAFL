@@ -10,9 +10,7 @@
 │  ├── deploy/          Ansible 部署脚本 (make deploy)         │
 │  ├── setup.sh         一键配置自定义 fuzzer + agent 编译      │
 │  ├── patches/         QEMU 补丁                             │
-│  ├── templates/       配置模板 (strategy.yaml 说明文档)      │
-│  ├── seeds/           种子 (IFT prefix + HTTP)              │
-│  └── tools/           replay_crash.py 等辅助工具            │
+│  └── templates/       配置说明文档                           │
 │                                                             │
 │  依赖 ──clone──► kafl.fuzzer (verf1sh/kafl.fuzzer)         │
 │  依赖 ──clone──► kafl.targets (verf1sh/kafl.targets)       │
@@ -141,6 +139,7 @@ kafl fuzz --config kafl.yaml -w /tmp/ivanti_fuzz
 | `strategy.txt` | 由 `generate_agent_config.py` 生成 | agent 读取的简化配置 (prefix 数量) |
 | `agent` | 编译输出 | VM 内运行的 fuzz agent |
 | `hook_SSL_read.so` | 编译输出 | LD_PRELOAD hook，拦截 SSL_read |
+| `replay_crash.py` | `firmware/ivanti/` | Crash 重放工具 |
 
 ## 5. 常见问题
 
