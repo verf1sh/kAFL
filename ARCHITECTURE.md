@@ -11,7 +11,8 @@
 │  ├── setup.sh         一键配置自定义 fuzzer + agent 编译      │
 │  ├── patches/         QEMU 补丁                             │
 │  ├── templates/       配置模板 (strategy.yaml 说明文档)      │
-│  └── seeds/           额外种子 (可选)                        │
+│  ├── seeds/           种子 (IFT prefix + HTTP)              │
+│  └── tools/           replay_crash.py 等辅助工具            │
 │                                                             │
 │  依赖 ──clone──► kafl.fuzzer (verf1sh/kafl.fuzzer)         │
 │  依赖 ──clone──► kafl.targets (verf1sh/kafl.targets)       │
