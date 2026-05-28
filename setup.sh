@@ -12,8 +12,7 @@
 #   2. 安装 Python 依赖
 #   3. 编译 agent + hook
 #   4. 打 QEMU 补丁
-#   5. 生成配置文件模板
-#   6. 复制种子到工作目录
+#   5. 生成工作目录配置 (config/)
 #
 set -euo pipefail
 
@@ -109,50 +108,36 @@ else
     warn "QEMU 补丁文件或目录不存在，跳过"
 fi
 
-# ── 6. 生成配置文件 ───────────────────────────────────────────────
+# ── 6. 生成工作目录配置 ───────────────────────────────────────────
 CONFIG_DIR="$SCRIPT_DIR/config"
 mkdir -p "$CONFIG_DIR"
 
-# kafl.yaml — 从 example 目录复制并替换路径
-IVANTI_KAFL="$SCRIPT_DIR/kafl/examples/firmware/ivanti/kafl.yaml"
-if [ ! -f "$CONFIG_DIR/kafl.yaml" ] && [ -f "$IVANTI_KAFL" ]; then
-    info "生成 kafl.yaml 配置 ..."
-    cp "$IVANTI_KAFL" "$CONFIG_DIR/kafl.yaml"
-    # 自动替换示例路径为实际路径
-    sed -i "s|/path/to/Ivanti.qcow2|$SCRIPT_DIR/Ivanti.qcow2|g" "$CONFIG_DIR/kafl.yaml"
-    sed -i "s|#strategy_config: ./strategy.yaml|strategy_config: $CONFIG_DIR/strategy.yaml|g" "$CONFIG_DIR/kafl.yaml"
-    sed -i "s|#seed_dir: ./seeds|seed_dir: $SEED_DST|g" "$CONFIG_DIR/kafl.yaml"
+# 从 example 目录复制配置文件
+IVANTI_DIR="$SCRIPT_DIR/kafl/examples/firmware/ivanti"
+
+if [ ! -f "$CONFIG_DIR/kafl.yaml" ] && [ -f "$IVANTI_DIR/kafl.yaml" ]; then
+    info "生成 kafl.yaml ..."
+    cp "$IVANTI_DIR/kafl.yaml" "$CONFIG_DIR/kafl.yaml"
+    # 替换 qcow2 路径为提示
+    sed -i "s|/path/to/Ivanti.qcow2|/path/to/your/Ivanti.qcow2|g" "$CONFIG_DIR/kafl.yaml"
 else
     warn "$CONFIG_DIR/kafl.yaml 已存在或 example 配置不存在，跳过"
 fi
 
-# strategy.yaml
-if [ ! -f "$CONFIG_DIR/strategy.yaml" ]; then
-    info "生成 strategy.yaml 配置模板 ..."
-    cp "$SCRIPT_DIR/templates/strategy.yaml.example" "$CONFIG_DIR/strategy.yaml"
-    sed -i "s|{{SEED_DIR}}|$SCRIPT_DIR/seeds|g" "$CONFIG_DIR/strategy.yaml"
+if [ ! -f "$CONFIG_DIR/strategy.yaml" ] && [ -f "$IVANTI_DIR/strategy.yaml" ]; then
+    info "生成 strategy.yaml ..."
+    cp "$IVANTI_DIR/strategy.yaml" "$CONFIG_DIR/strategy.yaml"
 else
-    warn "$CONFIG_DIR/strategy.yaml 已存在，跳过"
+    warn "$CONFIG_DIR/strategy.yaml 已存在或 example 配置不存在，跳过"
 fi
 
-# ── 7. 复制种子 ───────────────────────────────────────────────────
-SEED_SRC="$SCRIPT_DIR/seeds"
-SEED_DST="$SCRIPT_DIR/config/seeds"
-if [ -d "$SEED_SRC" ] && [ "$(ls -A "$SEED_SRC" 2>/dev/null)" ]; then
-    info "复制种子到配置目录 ..."
-    mkdir -p "$SEED_DST"
-    cp -r "$SEED_SRC"/* "$SEED_DST/"
-else
-    warn "种子目录为空或不存在，跳过"
-fi
-
-# ── 8. 生成 agent 策略文件 (strategy.txt) ───────────────────────────
+# ── 7. 生成 agent 策略文件 (strategy.txt) ───────────────────────────
 if [ -f "$CONFIG_DIR/strategy.yaml" ] && [ -f "$FUZZER_DIR/scripts/generate_agent_config.py" ]; then
     info "生成 agent strategy.txt ..."
     python3 "$FUZZER_DIR/scripts/generate_agent_config.py" \
         --strategy "$CONFIG_DIR/strategy.yaml" \
         --output "$CONFIG_DIR/strategy.txt" \
-        --seed-dir "$SEED_DST" \
+        --seed-dir "$IVANTI_DIR/seeds" \
         || warn "生成 strategy.txt 失败，请手动运行 generate_agent_config.py"
 else
     warn "缺少 strategy.yaml 或 generate_agent_config.py，跳过 strategy.txt 生成"
@@ -165,10 +150,14 @@ echo -e "${GREEN}  部署完成！${NC}"
 echo -e "${GREEN}============================================${NC}"
 echo ""
 echo "下一步："
-echo "  1. 编辑 config/kafl.yaml，填写你的 qcow2 镜像路径和 PT trace 范围"
-echo "  2. 编辑 config/strategy.yaml，确认目标协议和种子路径"
+echo "  1. 准备 Ivanti.qcow2 镜像"
+echo "  2. 编辑 config/kafl.yaml，填写 qcow2 路径和 PT trace 范围 (ip0)"
 echo "  3. 将 config/strategy.txt 拷贝到 VM 内部"
-echo "  4. 在 VM 内运行: ./agent config/strategy.txt"
+echo "  4. 在 VM 内运行: ./agent strategy.txt"
 echo "  5. 在宿主机运行: kafl fuzz --config config/kafl.yaml -w /tmp/ivanti_fuzz"
+echo ""
+echo "靶子目录: kafl/examples/firmware/ivanti/"
+echo "  - make          编译 agent"
+echo "  - replay_crash.py  重放 crash"
 echo ""
 echo "详细说明见: templates/setup_guide.md"
