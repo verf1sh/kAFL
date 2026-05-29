@@ -132,12 +132,12 @@ else
 fi
 
 # ── 7. 生成 agent 策略文件 (strategy.txt) ───────────────────────────
-if [ -f "$CONFIG_DIR/strategy.yaml" ] && [ -f "$FUZZER_DIR/scripts/generate_agent_config.py" ]; then
+if [ -f "$IVANTI_DIR/strategy.yaml" ] && [ -f "$FUZZER_DIR/scripts/generate_agent_config.py" ]; then
     info "生成 agent strategy.txt ..."
     python3 "$FUZZER_DIR/scripts/generate_agent_config.py" \
-        --strategy "$CONFIG_DIR/strategy.yaml" \
+        --strategy "$IVANTI_DIR/strategy.yaml" \
         --output "$CONFIG_DIR/strategy.txt" \
-        --seed-dir "$IVANTI_DIR/seeds" \
+        --seed-dir "$IVANTI_DIR" \
         || warn "生成 strategy.txt 失败，请手动运行 generate_agent_config.py"
 else
     warn "缺少 strategy.yaml 或 generate_agent_config.py，跳过 strategy.txt 生成"
